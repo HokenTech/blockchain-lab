@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#121c3d" />
+    <title>Laboratorio blockchain · Hoken Tech</title>
+    <link rel="stylesheet" href="lab.css" />
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="#"
+        >Hoken Tech <span>· laboratorio blockchain</span></a
+      >
+      <button
+        id="who"
+        class="who"
+        type="button"
+        title="Il nome che compare nelle tue registrazioni"
+      >
+        Chi sei?
+      </button>
+    </header>
+
+    <main id="app">
+      <!-- HOME -->
+      <section data-view="home">
+        <h1>Laboratorio blockchain</h1>
+        <p class="lead">
+          Scegli l'esercizio che ti indica il relatore. Tutto funziona dal
+          browser, senza installare niente e senza soldi veri: usiamo una
+          blockchain di prova.
+        </p>
+        <nav class="tiles">
+          <a href="#impronta"
+            ><b>1</b><span>Impronta</span><small>Che cos'è un hash</small></a
+          >
+          <a href="#catena"
+            ><b>2</b><span>Catena</span
+            ><small>Perché non si può barare</small></a
+          >
+          <a href="#notarizza"
+            ><b>3</b><span>Notarizza</span
+            ><small>Data certa per un file</small></a
+          >
+          <a href="#certificati"
+            ><b>4</b><span>Certificati</span
+            ><small>Verifica un attestato</small></a
+          >
+          <a href="#filiera"
+            ><b>5</b><span>Filiera</span
+            ><small>Il viaggio di un lotto</small></a
+          >
+          <a href="#gara"
+            ><b>6</b><span>Gara</span><small>Buste chiuse</small></a
+          >
+          <a href="#serve"
+            ><b>7</b><span>Serve?</span
+            ><small>Ci serve davvero una blockchain?</small></a
+          >
+        </nav>
+      </section>
+
+      <!-- 1. IMPRONTA -->
+      <section data-view="impronta">
+        <p class="kicker">Esercizio 1</p>
+        <h1>L'impronta digitale</h1>
+        <p class="lead">
+          Scrivi una frase e guarda la sua impronta (hash SHA-256). Poi cambia
+          una sola lettera, o aggiungi un punto.
+        </p>
+        <label class="field"
+          >La tua frase
+          <textarea id="imp-text" rows="3">
+Il workshop si tiene a Bari l'11 novembre 2026.</textarea
+          >
+        </label>
+        <div class="hashbox">
+          <span class="lbl">Impronta</span><code id="imp-hash"></code>
+        </div>
+        <p id="imp-diff" class="note"></p>
+        <details class="more">
+          <summary>Prova con un file</summary>
+          <label class="drop" id="imp-drop"
+            ><input type="file" id="imp-file" /><span
+              >Tocca per scegliere un file (foto, PDF…). Non viene caricato da
+              nessuna parte: l'impronta si calcola qui sul telefono.</span
+            ></label
+          >
+          <div class="hashbox">
+            <span class="lbl">Impronta del file</span
+            ><code id="imp-file-hash">—</code>
+          </div>
+        </details>
+        <ul class="facts">
+          <li>
+            Stesso contenuto, stessa impronta. Sempre, su qualunque computer.
+          </li>
+          <li>Basta una virgola per avere un'impronta del tutto diversa.</li>
+          <li>
+            Dall'impronta non si torna al contenuto: è una strada a senso unico.
+          </li>
+        </ul>
+      </section>
+
+      <!-- 2. CATENA -->
+      <section data-view="catena">
+        <p class="kicker">Esercizio 2</p>
+        <h1>La catena di blocchi</h1>
+        <p class="lead">
+          Ogni blocco contiene l'impronta del blocco precedente. Prova a
+          cambiare i dati del blocco 2: cosa succede ai blocchi dopo?
+        </p>
+        <div id="chain" class="chain"></div>
+        <div class="nodes" id="nodes"></div>
+        <div class="row">
+          <button type="button" class="btn ghost" id="chain-reset">
+            Ricomincia
+          </button>
+        </div>
+        <p class="note">
+          Il "nonce" è un numero che si prova a caso finché l'impronta inizia
+          con <code>000</code>: è il lavoro che costa fatica a chi vuole
+          riscrivere la storia.
+        </p>
+      </section>
+
+      <!-- 3. NOTARIZZA -->
+      <section data-view="notarizza">
+        <p class="kicker">Esercizio 3</p>
+        <h1>Notarizza un documento</h1>
+        <p class="lead">
+          Scegli un file. Sulla blockchain mettiamo solo la sua impronta, non il
+          file: nessuno vede cosa c'è dentro, ma chiunque potrà verificare che
+          esisteva oggi.
+        </p>
+        <div class="tabs" role="tablist">
+          <button type="button" class="on" data-tab="not-reg">Registra</button>
+          <button type="button" data-tab="not-ver">Verifica</button>
+        </div>
+        <div data-pane="not-reg">
+          <label class="drop"
+            ><input type="file" id="not-file" /><span
+              >Tocca per scegliere un file</span
+            ></label
+          >
+          <div class="hashbox">
+            <span class="lbl">Impronta</span><code id="not-hash">—</code>
+          </div>
+          <label class="field"
+            >Descrizione (facoltativa, è pubblica)
+            <input
+              id="not-label"
+              maxlength="80"
+              placeholder="es. bozza del mio progetto"
+            />
+          </label>
+          <button type="button" class="btn" id="not-send" disabled>
+            Registra in blockchain
+          </button>
+          <div id="not-out" class="out"></div>
+        </div>
+        <div data-pane="not-ver" hidden>
+          <label class="drop"
+            ><input type="file" id="ver-file" /><span
+              >Tocca per scegliere il file da verificare</span
+            ></label
+          >
+          <div id="ver-out" class="out"></div>
+        </div>
+        <h2>Ultime registrazioni</h2>
+        <ol id="not-list" class="list"></ol>
+      </section>
+
+      <!-- 4. CERTIFICATI -->
+      <section data-view="certificati">
+        <p class="kicker">Esercizio 4</p>
+        <h1>Verifica un attestato</h1>
+        <p class="lead">
+          Un ente autorizzato ha registrato l'impronta dei suoi attestati.
+          Carica il PDF che hai ricevuto: scopri chi l'ha emesso, quando, e se è
+          ancora valido.
+        </p>
+        <div class="samples">
+          <p>Non hai un attestato? Scaricane uno, poi caricalo qui sotto:</p>
+          <a href="demo/attestato-lucia-bianchi.pdf" download>Lucia Bianchi</a>
+          <a href="demo/attestato-marco-rossi.pdf" download>Marco Rossi</a>
+          <a href="demo/attestato-giovanni-verdi.pdf" download
+            >Giovanni Verdi</a
+          >
+        </div>
+        <label class="drop"
+          ><input type="file" id="cert-file" /><span
+            >Tocca per scegliere l'attestato (PDF)</span
+          ></label
+        >
+        <div id="cert-out" class="out"></div>
+        <h2>Attestati emessi</h2>
+        <ol id="cert-list" class="list"></ol>
+      </section>
+
+      <!-- 5. FILIERA -->
+      <section data-view="filiera">
+        <p class="kicker">Esercizio 5</p>
+        <h1>Il viaggio di un lotto</h1>
+        <p class="lead">
+          Ogni tappa della filiera viene scritta in blockchain da chi la fa. Si
+          può solo aggiungere: niente si cancella, niente si modifica.
+        </p>
+        <label class="field"
+          >Lotto
+          <select id="lot-pick"></select>
+        </label>
+        <ol id="lot-steps" class="timeline"></ol>
+        <h2>Aggiungi una tappa</h2>
+        <label class="field"
+          >Tappa
+          <select id="step-stage">
+            <option>Raccolta</option>
+            <option>Trasporto</option>
+            <option>Frantoio</option>
+            <option>Analisi</option>
+            <option>Confezionamento</option>
+            <option>Spedizione</option>
+            <option>Vendita</option>
+            <option>Correzione</option>
+          </select>
+        </label>
+        <label class="field"
+          >Dati
+          <input
+            id="step-data"
+            maxlength="200"
+            placeholder="es. 550 kg di olive, ore 7:30, Molfetta"
+          />
+        </label>
+        <button type="button" class="btn" id="step-send">
+          Scrivi la tappa
+        </button>
+        <div id="step-out" class="out"></div>
+      </section>
+
+      <!-- 6. GARA -->
+      <section data-view="gara">
+        <p class="kicker">Esercizio 6</p>
+        <h1>Gara a buste chiuse</h1>
+        <p class="lead">
+          Fai la tua offerta: in blockchain va solo una "busta chiusa"
+          (l'impronta di importo + parola segreta). Nessuno, nemmeno chi ha
+          bandito la gara, può leggerla prima della scadenza. Dopo la scadenza
+          apri la tua busta: il contratto controlla che corrisponda.
+        </p>
+        <div id="gara-box"></div>
+        <h2>Buste in gara</h2>
+        <ol id="bid-list" class="list"></ol>
+      </section>
+
+      <!-- 7. SERVE? -->
+      <section data-view="serve">
+        <p class="kicker">Lavoro di gruppo</p>
+        <h1>Ci serve davvero una blockchain?</h1>
+        <p class="lead">
+          Pensate a un processo reale (del vostro ufficio, della vostra azienda)
+          e rispondete alle domande.
+        </p>
+        <label class="field"
+          >Il vostro caso
+          <input
+            id="serve-case"
+            maxlength="120"
+            placeholder="es. registro delle presenze ai corsi"
+          />
+        </label>
+        <div id="serve-q"></div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      Testnet Jungle 4 · i dati sono pubblici e di prova ·
+      <a
+        href="https://www.hokentech.tech/workshops"
+        target="_blank"
+        rel="noopener"
+        >hokentech.tech/workshops</a
+      >
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="sha256.js"></script>
+    <script src="vendor/antelope.js" onerror="window.Antelope = null"></script>
+    <script src="chain.js"></script>
+    <script src="lab.js"></script>
+    <script src="deckkeys.js"></script>
+  </body>
+</html>
