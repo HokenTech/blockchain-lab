@@ -44,7 +44,7 @@
   // Il nodo risponde con l'errore del contratto in error.details[0].message: lo ripuliamo per mostrarlo.
   function rpcError(j) {
     var d = j && j.error && j.error.details && j.error.details[0];
-    var msg = d ? d.message : (j && j.message) || "errore sconosciuto";
+    var msg = d ? d.message : (j && j.message) || L("errore sconosciuto", "unknown error");
     msg = msg.replace(/^assertion failure with message:\s*/, "");
     var e = new Error(msg);
     e.fromChain = true;
@@ -97,14 +97,14 @@
       return Promise.reject(
         new Error(
           C.demo
-            ? "Questa è la versione dimostrativa: qui si legge e si verifica, ma non si scrive. Al workshop si usa quella completa."
-            : "Qui stai guardando il contratto " + C.contract + ": per scriverci si usa cleos."
+            ? L("Questa è la versione dimostrativa: qui si legge e si verifica, ma non si scrive. Al workshop si usa quella completa.", "This is the demo version: here you can read and check, but not write. The workshop uses the full one.")
+            : L("Qui stai guardando il contratto " + C.contract + ": per scriverci si usa cleos.", "You are looking at the contract " + C.contract + ": to write to it, use cleos.")
         )
       );
     if (!ready())
       return Promise.reject(
         new Error(
-          "La scrittura in blockchain non è ancora configurata (manca config o vendor/antelope.js)."
+          L("La scrittura in blockchain non è ancora configurata (manca config o vendor/antelope.js).", "Writing to the blockchain isn't configured yet (config or vendor/antelope.js is missing).")
         )
       );
     var A = window.Antelope;
@@ -184,10 +184,10 @@
           var s = st && st.state;
           if (s === "IN_BLOCK" || s === "IRREVERSIBLE") return s;
           if (s === "FAILED" || s === "FORKED_OUT")
-            throw new Error("La rete ha scartato la transazione: riprova.");
+            throw new Error(L("La rete ha scartato la transazione: riprova.", "The network dropped the transaction: try again."));
           if (Date.now() > until)
             throw new Error(
-              "Transazione non ancora confermata: ricarica tra qualche secondo per controllare."
+              L("Transazione non ancora confermata: ricarica tra qualche secondo per controllare.", "Transaction not confirmed yet: reload in a few seconds to check.")
             );
           return poll();
         });

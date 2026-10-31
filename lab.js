@@ -1,4 +1,4 @@
-/* Laboratorio blockchain: navigazione e i sette esercizi. */
+/* Laboratorio blockchain: navigazione e i dieci esercizi. Le stringhe sono in italiano e inglese: L(it, en) da i18n.js. */
 (function () {
   "use strict";
   var C = window.LAB_CONFIG;
@@ -23,7 +23,7 @@
     return new Date(/Z$/.test(ts) ? ts : ts + "Z");
   }
   function fmt(ts) {
-    return chainDate(ts).toLocaleString("it-IT", {
+    return chainDate(ts).toLocaleString(L("it-IT", "en-GB"), {
       day: "2-digit",
       month: "short",
       hour: "2-digit",
@@ -62,7 +62,7 @@
     return (
       '<a href="' +
       Chain.txUrl(r.id) +
-      '" target="_blank" rel="noopener">Vedi la transazione sull\'explorer</a>'
+      '" target="_blank" rel="noopener">' + L("Vedi la transazione sull'explorer", "See the transaction on the explorer") + "</a>"
     );
   }
   function fail(el) {
@@ -84,8 +84,10 @@
       var wrap = document.createElement("div");
       wrap.className = "modal";
       wrap.innerHTML =
-        "<form><h2>Come ti chiami?</h2><p>Il nome (o un soprannome) compare nelle tue registrazioni, che sono pubbliche.</p>" +
-        '<input maxlength="24" required placeholder="es. Lucia B." value="' +
+        "<form><h2>" + L("Come ti chiami?", "What's your name?") + "</h2><p>" +
+        L("Il nome (o un soprannome) compare nelle tue registrazioni, che sono pubbliche.", "Your name (or a nickname) appears on your records, which are public.") +
+        "</p>" +
+        '<input maxlength="24" required placeholder="' + L("es.", "e.g.") + ' Lucia B." value="' +
         esc(nick()) +
         '"><button class="btn">Ok</button></form>';
       document.body.appendChild(wrap);
@@ -103,6 +105,8 @@
     });
   }
   function needNick() {
+    // Nella demo non si scrive: niente nome da chiedere, Chain.push risponde con il messaggio della demo.
+    if (C.demo) return Promise.resolve(nick() || "demo");
     return nick() ? Promise.resolve(nick()) : askNick();
   }
   $("who").addEventListener("click", askNick);
@@ -143,18 +147,18 @@
   if (C.demo) {
     var demo = document.createElement("p");
     demo.className = "banner own";
-    demo.textContent = "Versione dimostrativa: puoi leggere e verificare, ma non scrivere. Al workshop si usa quella completa.";
+    demo.textContent = L("Versione dimostrativa: puoi leggere e verificare, ma non scrivere. Al workshop si usa quella completa.", "Demo version: you can read and check, but not write. The workshop uses the full one.");
     document.querySelector("main").insertBefore(demo, document.querySelector("main").firstChild);
   } else if (C.own) {
     var own = document.createElement("p");
     own.className = "banner own";
-    own.innerHTML = "Stai guardando il registro del contratto <b>" + esc(C.contract) + "</b>: puoi verificare file e attestati. Per scrivere su questo contratto si usa cleos. <a href=\"" + location.pathname + "\">Torna al registro dell'aula</a>";
+    own.innerHTML = L("Stai guardando il registro del contratto <b>", "You are looking at the register of the contract <b>") + esc(C.contract) + L("</b>: puoi verificare file e attestati. Per scrivere su questo contratto si usa cleos. ", "</b>: you can check files and certificates. To write to this contract, use cleos. ") + "<a href=\"" + location.pathname + "\">" + L("Torna al registro dell'aula", "Back to the classroom register") + "</a>";
     document.querySelector("main").insertBefore(own, document.querySelector("main").firstChild);
   } else if (!Chain.ready()) {
     var warn = document.createElement("p");
     warn.className = "banner";
     warn.textContent =
-      "Modalità dimostrazione: gli esercizi 1, 2 e 7 funzionano; per scrivere in blockchain il relatore deve completare la configurazione.";
+      L("Modalità dimostrazione: gli esercizi 1, 2 e 7 funzionano; per scrivere in blockchain il relatore deve completare la configurazione.", "Demo mode: exercises 1, 2 and 7 work; to write to the blockchain the speaker has to finish the setup.");
     document.querySelector("[data-view=home]").appendChild(warn);
   }
 
@@ -171,9 +175,9 @@
     }
     $("imp-hash").innerHTML = html;
     if (lastHash && lastHash !== h)
-      $("imp-diff").textContent = changed + " caratteri su 64 sono cambiati.";
+      $("imp-diff").textContent = changed + L(" caratteri su 64 sono cambiati.", " of 64 characters have changed.");
     else if (lastHash)
-      $("imp-diff").textContent = "Impronta identica: il testo è lo stesso.";
+      $("imp-diff").textContent = L("Impronta identica: il testo è lo stesso.", "Same fingerprint: the text is the same.");
     lastHash = h;
   }
   $("imp-text").addEventListener("input", updImpronta);
@@ -181,7 +185,7 @@
     var f = e.target.files[0];
     if (!f) return;
     e.target.value = "";
-    $("imp-file-hash").textContent = "calcolo…";
+    $("imp-file-hash").textContent = L("calcolo…", "calculating…");
     fileHash(f).then(function (h) {
       $("imp-file-hash").textContent = h;
     });
@@ -192,10 +196,10 @@
   var DIFF = "000";
   var GENESIS = "0".repeat(64);
   var INITIAL = [
-    "Apertura del registro",
-    "Diploma n. 12 a Lucia Bianchi",
-    "Lotto OL-2025: 550 kg di olive",
-    "Gara 7: arrivata la busta di Rossi Srl",
+    L("Apertura del registro", "Register opened"),
+    L("Diploma n. 12 a Lucia Bianchi", "Diploma no. 12 to Lucia Bianchi"),
+    L("Lotto OL-2025: 550 kg di olive", "Batch OL-2025: 550 kg of olives"),
+    L("Gara 7: arrivata la busta di Rossi Srl", "Tender 7: Rossi Srl's envelope received"),
   ];
   var blocks = [],
     original = "";
@@ -237,12 +241,12 @@
           '<div class="block ' +
           (ok ? "ok" : "bad") +
           '">' +
-          '<div class="bh"><b>Blocco ' +
+          '<div class="bh"><b>' + L("Blocco ", "Block ") +
           b.n +
           "</b><span>" +
-          (ok ? "valido" : "NON valido") +
+          (ok ? L("valido", "valid") : L("NON valido", "NOT valid")) +
           "</span></div>" +
-          '<label>Dati<input data-i="' +
+          "<label>" + L("Dati", "Data") + '<input data-i="' +
           i +
           '" value="' +
           esc(b.data) +
@@ -250,17 +254,17 @@
           '<div class="kv"><span>Nonce</span><code>' +
           b.nonce +
           "</code></div>" +
-          '<div class="kv"><span>Precedente</span><code>' +
+          '<div class="kv"><span>' + L("Precedente", "Previous") + "</span><code>" +
           short(b.prev) +
           "</code></div>" +
-          '<div class="kv"><span>Impronta</span><code>' +
+          '<div class="kv"><span>' + L("Impronta", "Fingerprint") + "</span><code>" +
           short(b.hash) +
           "</code></div>" +
           (ok
             ? ""
             : '<button type="button" class="btn small" data-mine="' +
               i +
-              '">Ricalcola (mina)</button>') +
+              '">' + L("Ricalcola (mina)", "Recalculate (mine)") + "</button>") +
           "</div>"
         );
       })
@@ -268,15 +272,15 @@
     var mineLast = blocks[blocks.length - 1].hash;
     var agree = mineLast === original;
     $("nodes").innerHTML =
-      node("La tua copia", mineLast, true) +
-      node("Nodo di Lucia", original, agree) +
-      node("Nodo di Marco", original, agree) +
+      node(L("La tua copia", "Your copy"), mineLast, true) +
+      node(L("Nodo di Lucia", "Lucia's node"), original, agree) +
+      node(L("Nodo di Marco", "Marco's node"), original, agree) +
       '<p class="verdict ' +
       (agree ? "ok" : "bad") +
       '">' +
       (agree
-        ? "Tutte e tre le copie coincidono: la rete è d'accordo."
-        : "La tua copia è diversa dalle altre due. La rete tiene la versione della maggioranza: la tua modifica viene scartata.") +
+        ? L("Tutte e tre le copie coincidono: la rete è d'accordo.", "All three copies match: the network agrees.")
+        : L("La tua copia è diversa dalle altre due. La rete tiene la versione della maggioranza: la tua modifica viene scartata.", "Your copy is different from the other two. The network keeps the majority's version: your change is thrown out.")) +
       "</p>";
   }
   function node(name, h, same) {
@@ -304,7 +308,7 @@
     var b = e.target.closest("[data-mine]");
     if (!b) return;
     var i = +b.dataset.mine;
-    b.textContent = "Sto cercando il nonce…";
+    b.textContent = L("Sto cercando il nonce…", "Looking for the nonce…");
     setTimeout(function () {
       mine(blocks[i]);
       relink(i + 1);
@@ -320,7 +324,7 @@
     var f = e.target.files[0];
     if (!f) return;
     e.target.value = "";
-    $("not-hash").textContent = "calcolo…";
+    $("not-hash").textContent = L("calcolo…", "calculating…");
     if (!$("not-label").value) $("not-label").value = f.name.slice(0, 80);
     fileHash(f).then(function (h) {
       notHash = h;
@@ -334,14 +338,14 @@
     needNick()
       .then(function (n) {
         busy(btn, true);
-        msg(out, "info", "Controllo il registro…");
+        msg(out, "info", L("Controllo il registro…", "Checking the register…"));
         // Il contratto rifiuterebbe comunque un doppione: controllare prima dà subito la data della prima registrazione.
         return Chain.rows("docs").then(function (rs) {
           var prev = rs.filter(function (x) {
             return x.hash === notHash;
           })[0];
           if (prev) return { dup: prev };
-          msg(out, "info", "Invio in corso…");
+          msg(out, "info", L("Invio in corso…", "Sending…"));
           return Chain.push("notarize", {
             by: C.aula,
             hash: notHash,
@@ -355,18 +359,18 @@
           msg(
             out,
             "err",
-            "<b>Questo file è già registrato</b> dal " +
+            L("<b>Questo file è già registrato</b> dal ", "<b>This file is already registered</b> since ") +
               fmt(r.dup.ts) +
-              " (da " +
+              L(" (da ", " (by ") +
               esc(r.dup.nick) +
-              "). Chi lo ha registrato per primo ha la prova: un secondo non serve, e il contratto lo rifiuterebbe."
+              L("). Chi lo ha registrato per primo ha la prova: un secondo non serve, e il contratto lo rifiuterebbe.", "). Whoever registered it first has the proof: a second record isn't needed, and the contract would refuse it.")
           );
           return;
         }
         msg(
           out,
           "ok",
-          "<b>Fatto.</b> Da questo momento chiunque può verificare che il file esisteva oggi. " +
+          L("<b>Fatto.</b> Da questo momento chiunque può verificare che il file esisteva oggi. ", "<b>Done.</b> From now on anyone can check that the file existed today. ") +
             txLink(r)
         );
         loaders.notarizza();
@@ -381,7 +385,7 @@
       out = $("ver-out");
     if (!f) return;
     e.target.value = "";
-    msg(out, "info", "Calcolo l'impronta e cerco nel registro…");
+    msg(out, "info", L("Calcolo l'impronta e cerco nel registro…", "Calculating the fingerprint and searching the register…"));
     fileHash(f)
       .then(function (h) {
         return Chain.rows("docs").then(function (rs) {
@@ -392,9 +396,9 @@
             msg(
               out,
               "ok",
-              "<b>Trovato.</b> Registrato il " +
+              L("<b>Trovato.</b> Registrato il ", "<b>Found.</b> Registered on ") +
                 fmt(r.ts) +
-                " da " +
+                L(" da ", " by ") +
                 esc(r.nick) +
                 (r.label ? " · «" + esc(r.label) + "»" : "") +
                 ".<br><code>" +
@@ -405,7 +409,7 @@
             msg(
               out,
               "err",
-              "<b>Non trovato.</b> Nessuno ha registrato questo file, oppure il file è stato modificato anche solo di un byte.<br><code>" +
+              L("<b>Non trovato.</b> Nessuno ha registrato questo file, oppure il file è stato modificato anche solo di un byte.", "<b>Not found.</b> Nobody has registered this file, or the file has been changed, even by a single byte.") + "<br><code>" +
                 h +
                 "</code>"
             );
@@ -425,7 +429,7 @@
                 "<li><b>" +
                 esc(r.nick) +
                 "</b> " +
-                esc(r.label || "senza descrizione") +
+                esc(r.label || L("senza descrizione", "no description")) +
                 "<small>" +
                 fmt(r.ts) +
                 " · <code>" +
@@ -433,10 +437,10 @@
                 "</code></small></li>"
               );
             })
-            .join("") || "<li>Ancora nessuna registrazione.</li>";
+            .join("") || "<li>" + L("Ancora nessuna registrazione.", "No records yet.") + "</li>";
       })
       .catch(function () {
-        $("not-list").innerHTML = "<li>Registro non raggiungibile.</li>";
+        $("not-list").innerHTML = "<li>" + L("Registro non raggiungibile.", "Register unreachable.") + "</li>";
       });
   };
 
@@ -458,7 +462,7 @@
       out = $("cert-out");
     if (!f) return;
     e.target.value = "";
-    msg(out, "info", "Verifico…");
+    msg(out, "info", L("Verifico…", "Checking…"));
     Promise.all([fileHash(f), Chain.rows("certs"), issuersMap()])
       .then(function (res) {
         var h = res[0],
@@ -470,7 +474,7 @@
           msg(
             out,
             "err",
-            "<b>Attestato non riconosciuto.</b> Non è stato emesso da un ente del registro, oppure è stato modificato.<br><code>" +
+            L("<b>Attestato non riconosciuto.</b> Non è stato emesso da un ente del registro, oppure è stato modificato.", "<b>Certificate not recognized.</b> It wasn't issued by a body in the register, or it has been changed.") + "<br><code>" +
               h +
               "</code>"
           );
@@ -481,27 +485,27 @@
           msg(
             out,
             "err",
-            "<b>Attestato revocato.</b> Emesso da " +
+            L("<b>Attestato revocato.</b> Emesso da ", "<b>Certificate revoked.</b> Issued by ") +
               who +
-              " a " +
+              L(" a ", " to ") +
               esc(c.holder) +
-              " per «" +
-              esc(c.course) +
-              "», poi revocato: " +
-              esc(c.reason) +
+              L(" per «", " for «") +
+              esc(LT(c.course)) +
+              L("», poi revocato: ", "», then revoked: ") +
+              esc(LT(c.reason)) +
               "."
           );
         else
           msg(
             out,
             "ok",
-            "<b>Attestato valido.</b> Emesso da " +
+            L("<b>Attestato valido.</b> Emesso da ", "<b>Valid certificate.</b> Issued by ") +
               who +
-              " a <b>" +
+              L(" a <b>", " to <b>") +
               esc(c.holder) +
-              "</b> per «" +
-              esc(c.course) +
-              "» il " +
+              L("</b> per «", "</b> for «") +
+              esc(LT(c.course)) +
+              L("» il ", "» on ") +
               fmt(c.ts) +
               "."
           );
@@ -522,19 +526,19 @@
                 '"><b>' +
                 esc(c.holder) +
                 "</b> " +
-                esc(c.course) +
+                esc(LT(c.course)) +
                 "<small>" +
                 esc(res[1][c.issuer] || c.issuer) +
                 " · " +
                 fmt(c.ts) +
-                (+c.revoked ? " · REVOCATO" : "") +
+                (+c.revoked ? L(" · REVOCATO", " · REVOKED") : "") +
                 "</small></li>"
               );
             })
-            .join("") || "<li>Nessun attestato emesso.</li>";
+            .join("") || "<li>" + L("Nessun attestato emesso.", "No certificates issued.") + "</li>";
       })
       .catch(function () {
-        $("cert-list").innerHTML = "<li>Registro non raggiungibile.</li>";
+        $("cert-list").innerHTML = "<li>" + L("Registro non raggiungibile.", "Register unreachable.") + "</li>";
       });
   };
 
@@ -552,17 +556,17 @@
             '<li class="' +
             (s.stage === "Correzione" ? "fix" : "") +
             '"><b>' +
-            esc(s.stage) +
+            esc(LT(s.stage)) +
             "</b><p>" +
-            esc(s.data) +
+            esc(LT(s.data)) +
             "</p><small>" +
-            esc(s.nick) +
+            esc(LT(s.nick)) +
             " · " +
             fmt(s.ts) +
             "</small></li>"
           );
         })
-        .join("") || "<li>Nessuna tappa per questo lotto.</li>";
+        .join("") || "<li>" + L("Nessuna tappa per questo lotto.", "No steps for this batch.") + "</li>";
   }
   loaders.filiera = function () {
     Chain.rows("steps")
@@ -583,7 +587,7 @@
         drawLot();
       })
       .catch(function () {
-        $("lot-steps").innerHTML = "<li>Registro non raggiungibile.</li>";
+        $("lot-steps").innerHTML = "<li>" + L("Registro non raggiungibile.", "Register unreachable.") + "</li>";
       });
   };
   $("lot-pick").addEventListener("change", drawLot);
@@ -592,13 +596,13 @@
       out = $("step-out"),
       data = $("step-data").value.trim();
     if (!data) {
-      msg(out, "err", "Scrivi i dati della tappa.");
+      msg(out, "err", L("Scrivi i dati della tappa.", "Write the step's data."));
       return;
     }
     needNick()
       .then(function (n) {
         busy(btn, true);
-        msg(out, "info", "Invio in corso…");
+        msg(out, "info", L("Invio in corso…", "Sending…"));
         return Chain.push("addstep", {
           by: C.aula,
           lot: $("lot-pick").value || "OL-2025",
@@ -611,7 +615,7 @@
         msg(
           out,
           "ok",
-          "<b>Tappa scritta.</b> Da ora non si può più cancellare. " + txLink(r)
+          L("<b>Tappa scritta.</b> Da ora non si può più cancellare. ", "<b>Step written.</b> From now on it can't be deleted. ") + txLink(r)
         );
         $("step-data").value = "";
         loaders.filiera();
@@ -677,7 +681,7 @@
         return b.nick === n;
       });
     var head = tender
-      ? '<div class="tender"><b>Gara ' +
+      ? '<div class="tender"><b>' + L("Gara ", "Tender ") +
         tender.id +
         ":</b> " +
         esc(tender.title) +
@@ -685,61 +689,61 @@
       : "";
     if (p === "none") {
       box.innerHTML =
-        '<p class="out info">Nessuna gara aperta: aspetta che il relatore la bandisca.</p>';
+        '<p class="out info">' + L("Nessuna gara aperta: aspetta che il relatore la bandisca.", "No open tender: wait for the speaker to call one.") + "</p>";
       return;
     }
     if (p === "bid") {
       box.innerHTML =
         head +
-        '<p class="clock">Offerte aperte ancora per <b>' +
+        '<p class="clock">' + L("Offerte aperte ancora per ", "Bids open for another ") + "<b>" +
         left(tender.bid_end) +
         "</b></p>" +
         (already
-          ? '<p class="out ok">La tua busta chiusa è in gara.' +
+          ? '<p class="out ok">' + L("La tua busta chiusa è in gara.", "Your sealed envelope is in the tender.") +
             (mine
-              ? " Importo: " +
+              ? L(" Importo: ", " Amount: ") +
                 mine.amount +
-                " € · parola segreta: <b>" +
+                L(" € · parola segreta: <b>", " € · secret word: <b>") +
                 esc(mine.salt) +
-                "</b> (salvata su questo telefono)."
+                L("</b> (salvata su questo telefono).", "</b> (saved on this phone).")
               : "") +
             "</p>"
-          : '<label class="field">La tua offerta in euro (vince la più bassa)<input id="bid-amount" type="number" min="1" step="1" inputmode="numeric" placeholder="es. 48000"></label>' +
-            '<button type="button" class="btn" id="bid-send">Chiudi la busta e invia</button>') +
+          : '<label class="field">' + L("La tua offerta in euro (vince la più bassa)", "Your bid in euros (the lowest wins)") + '<input id="bid-amount" type="number" min="1" step="1" inputmode="numeric" placeholder="' + L("es.", "e.g.") + ' 48000"></label>' +
+            '<button type="button" class="btn" id="bid-send">' + L("Chiudi la busta e invia", "Seal the envelope and send") + "</button>") +
         '<div id="gara-out" class="out"></div>';
     } else if (p === "reveal") {
       box.innerHTML =
         head +
-        '<p class="clock">Apertura buste: hai ancora <b>' +
+        '<p class="clock">' + L("Apertura buste: hai ancora ", "Opening the envelopes: you have ") + "<b>" +
         left(tender.reveal_end) +
         "</b></p>" +
         (mine &&
         !bids.some(function (b) {
           return b.nick === n && +b.revealed;
         })
-          ? '<button type="button" class="btn" id="bid-reveal">Apri la mia busta (' +
+          ? '<button type="button" class="btn" id="bid-reveal">' + L("Apri la mia busta (", "Open my envelope (") +
             mine.amount +
             " €)</button>"
           : '<p class="out info">' +
             (already
-              ? "Busta già aperta, oppure la parola segreta non è su questo telefono."
-              : "Non hai una busta in questa gara.") +
+              ? L("Busta già aperta, oppure la parola segreta non è su questo telefono.", "Envelope already opened, or the secret word isn't on this phone.")
+              : L("Non hai una busta in questa gara.", "You don't have an envelope in this tender.")) +
             "</p>") +
         '<div id="gara-out" class="out"></div>';
     } else if (p === "toaward") {
       box.innerHTML =
         head +
-        '<p class="clock">Tempo scaduto. Chiunque può chiedere al contratto di aggiudicare.</p><button type="button" class="btn" id="bid-award">Aggiudica la gara</button><div id="gara-out" class="out"></div>';
+        '<p class="clock">' + L("Tempo scaduto. Chiunque può chiedere al contratto di aggiudicare.", "Time's up. Anyone can ask the contract to award the tender.") + '</p><button type="button" class="btn" id="bid-award">' + L("Aggiudica la gara", "Award the tender") + '</button><div id="gara-out" class="out"></div>';
     } else {
       box.innerHTML =
         head +
-        '<p class="out ok winner">Vince <b>' +
+        '<p class="out ok winner">' + L("Vince ", "The winner is ") + "<b>" +
         esc(tender.winner) +
         "</b>" +
         (+tender.amount
-          ? " con " + (+tender.amount).toLocaleString("it-IT") + " €"
+          ? L(" con ", " with ") + (+tender.amount).toLocaleString(L("it-IT", "en-GB")) + " €"
           : "") +
-        ". Deciso dal contratto, non da una persona.</p>";
+        L(". Deciso dal contratto, non da una persona.", ". Decided by the contract, not by a person.") + "</p>";
     }
   }
   function drawBids() {
@@ -751,14 +755,14 @@
             esc(b.nick) +
             "</b> " +
             (+b.revealed
-              ? (+b.amount).toLocaleString("it-IT") + " €"
-              : "busta chiusa") +
+              ? (+b.amount).toLocaleString(L("it-IT", "en-GB")) + " €"
+              : L("busta chiusa", "sealed envelope")) +
             "<small><code>" +
             short(b.sealed) +
             "</code></small></li>"
           );
         })
-        .join("") || "<li>Ancora nessuna busta.</li>";
+        .join("") || "<li>" + L("Ancora nessuna busta.", "No envelopes yet.") + "</li>";
   }
   loaders.gara = function () {
     Promise.all([Chain.rows("tenders"), Chain.rows("bids")])
@@ -774,7 +778,7 @@
       })
       .catch(function () {
         $("gara-box").innerHTML =
-          '<p class="out err">Registro non raggiungibile.</p>';
+          '<p class="out err">' + L("Registro non raggiungibile.", "Register unreachable.") + "</p>";
       });
     clearInterval(tick);
     var last = phase();
@@ -797,7 +801,7 @@
     if (e.target.id === "bid-send") {
       var amount = Math.floor(+$("bid-amount").value);
       if (!(amount > 0)) {
-        msg(out, "err", "Scrivi un importo intero in euro.");
+        msg(out, "err", L("Scrivi un importo intero in euro.", "Write a whole amount in euros."));
         return;
       }
       var btn = e.target;
@@ -810,7 +814,7 @@
           msg(
             out,
             "info",
-            "Busta chiusa: <code>" + short(sealed) + "</code>. Invio…"
+            L("Busta chiusa: <code>", "Sealed envelope: <code>") + short(sealed) + L("</code>. Invio…", "</code>. Sending…")
           );
           return Chain.push("bid", {
             by: C.aula,
@@ -854,57 +858,57 @@
   // ---------- 7. Serve una blockchain? ----------
   var Q = {
     start: {
-      q: "Dovete conservare dei dati o uno storico di operazioni?",
+      q: L("Dovete conservare dei dati o uno storico di operazioni?", "Do you need to keep data or a history of operations?"),
       yes: "multi",
       no: "R-nodata",
     },
     multi: {
-      q: "Ci sono più soggetti diversi (uffici, aziende, persone) che devono scrivere in quel registro?",
+      q: L("Ci sono più soggetti diversi (uffici, aziende, persone) che devono scrivere in quel registro?", "Are there several different parties (offices, companies, people) who need to write to that register?"),
       yes: "trust",
       no: "R-db",
     },
     trust: {
-      q: "Esiste qualcuno di cui tutti si fidano, sempre disponibile, che può tenere il registro per tutti?",
+      q: L("Esiste qualcuno di cui tutti si fidano, sempre disponibile, che può tenere il registro per tutti?", "Is there someone everybody trusts, always available, who can keep the register for everyone?"),
       yes: "R-trusted",
       no: "oracle",
     },
     oracle: {
-      q: "I dati nascono digitali (un file, un pagamento, una firma)? Rispondete no se qualcuno deve dichiarare cosa succede nel mondo fisico.",
+      q: L("I dati nascono digitali (un file, un pagamento, una firma)? Rispondete no se qualcuno deve dichiarare cosa succede nel mondo fisico.", "Is the data born digital (a file, a payment, a signature)? Answer no if someone has to declare what happens in the physical world."),
       yes: "known",
       no: "known",
       flag: "no",
     },
     known: {
-      q: "Chi scrive è noto e autorizzato (aziende di un consorzio, enti, uffici)?",
+      q: L("Chi scrive è noto e autorizzato (aziende di un consorzio, enti, uffici)?", "Are the writers known and authorized (companies in a consortium, public bodies, offices)?"),
       yes: "public",
       no: "R-public",
     },
     public: {
-      q: "Chiunque, anche fuori dal gruppo, deve poter verificare i dati senza chiedere il permesso a nessuno?",
+      q: L("Chiunque, anche fuori dal gruppo, deve poter verificare i dati senza chiedere il permesso a nessuno?", "Must anyone, even outside the group, be able to check the data without asking anybody's permission?"),
       yes: "R-public",
       no: "R-permissioned",
     },
   };
   var R = {
     "R-nodata": [
-      "Non serve",
-      "Senza dati da conservare non c'è un registro da proteggere.",
+      L("Non serve", "Not needed"),
+      L("Senza dati da conservare non c'è un registro da proteggere.", "With no data to keep, there's no register to protect."),
     ],
     "R-db": [
-      "Basta un database",
-      "Se scrive un solo soggetto, la blockchain aggiunge costi e complessità senza benefici. Al massimo, per avere una data certa, si può notarizzare ogni tanto l'impronta del database.",
+      L("Basta un database", "A database is enough"),
+      L("Se scrive un solo soggetto, la blockchain aggiunge costi e complessità senza benefici. Al massimo, per avere una data certa, si può notarizzare ogni tanto l'impronta del database.", "If only one party writes, a blockchain adds cost and complexity with no benefit. At most, to get a certain date, you can notarize the database's fingerprint now and then."),
     ],
     "R-trusted": [
-      "Database gestito da chi è fidato",
-      "Se c'è un soggetto di cui tutti si fidano (un ente, un notaio, un consorzio), è più semplice ed economico che tenga lui il registro. La blockchain serve proprio quando questo soggetto manca.",
+      L("Database gestito da chi è fidato", "A database run by the trusted party"),
+      L("Se c'è un soggetto di cui tutti si fidano (un ente, un notaio, un consorzio), è più semplice ed economico che tenga lui il registro. La blockchain serve proprio quando questo soggetto manca.", "If there's a party everyone trusts (a public body, a notary, a consortium), it's simpler and cheaper for them to keep the register. A blockchain is useful precisely when that party is missing."),
     ],
     "R-permissioned": [
-      "Blockchain con permessi",
-      "Più soggetti noti che non vogliono dipendere da uno solo: una blockchain in cui scrivono solo i membri autorizzati (per esempio un consorzio di filiera, o EBSI per i diplomi in Europa).",
+      L("Blockchain con permessi", "Permissioned blockchain"),
+      L("Più soggetti noti che non vogliono dipendere da uno solo: una blockchain in cui scrivono solo i membri autorizzati (per esempio un consorzio di filiera, o EBSI per i diplomi in Europa).", "Several known parties who don't want to depend on just one: a blockchain where only authorized members write (for example a supply chain consortium, or EBSI for diplomas in Europe)."),
     ],
     "R-public": [
-      "Blockchain pubblica",
-      "Chi scrive non è noto in anticipo, oppure chiunque deve poter verificare senza chiedere permessi: è il caso tipico di una blockchain pubblica, come quella che abbiamo usato oggi.",
+      L("Blockchain pubblica", "Public blockchain"),
+      L("Chi scrive non è noto in anticipo, oppure chiunque deve poter verificare senza chiedere permessi: è il caso tipico di una blockchain pubblica, come quella che abbiamo usato oggi.", "The writers aren't known in advance, or anyone must be able to check without asking permission: the typical case for a public blockchain, like the one we used today."),
     ],
   };
   var path = [];
@@ -919,7 +923,7 @@
         '<div class="qa done"><p>' +
         q.q +
         "</p><b>" +
-        (a === "yes" ? "Sì" : "No") +
+        (a === "yes" ? L("Sì", "Yes") : L("No", "No")) +
         "</b></div>";
       node = q[a];
     });
@@ -927,23 +931,23 @@
       var c = $("serve-case").value.trim();
       html +=
         '<div class="result"><p class="kicker">' +
-        (c ? esc(c) : "Il vostro caso") +
+        (c ? esc(c) : L("Il vostro caso", "Your case")) +
         "</p><h2>" +
         R[node][0] +
         "</h2><p>" +
         R[node][1] +
         "</p>" +
         (oracleWarn
-          ? '<p class="warn"><b>Attenzione all\'oracolo:</b> la blockchain garantisce che un dato non cambi, non che sia vero. Se qualcuno dichiara cosa succede nel mondo fisico servono controlli, sensori o firme di chi ne risponde.</p>'
+          ? '<p class="warn">' + L("<b>Attenzione all'oracolo:</b> la blockchain garantisce che un dato non cambi, non che sia vero. Se qualcuno dichiara cosa succede nel mondo fisico servono controlli, sensori o firme di chi ne risponde.", "<b>Watch out for the oracle:</b> a blockchain guarantees that data doesn't change, not that it's true. If someone declares what happens in the physical world, you need checks, sensors or signatures from whoever is accountable.") + "</p>"
           : "") +
-        '<button type="button" class="btn ghost" data-serve="restart">Ricomincia</button></div>';
+        '<button type="button" class="btn ghost" data-serve="restart">' + L("Ricomincia", "Start again") + "</button></div>";
     } else {
       html +=
         '<div class="qa"><p>' +
         Q[node].q +
-        '</p><div class="row"><button type="button" class="btn" data-serve="yes">Sì</button><button type="button" class="btn" data-serve="no">No</button></div></div>' +
+        '</p><div class="row"><button type="button" class="btn" data-serve="yes">' + L("Sì", "Yes") + '</button><button type="button" class="btn" data-serve="no">No</button></div></div>' +
         (path.length
-          ? '<button type="button" class="btn ghost small" data-serve="back">Indietro</button>'
+          ? '<button type="button" class="btn ghost small" data-serve="back">' + L("Indietro", "Back") + "</button>"
           : "");
     }
     $("serve-q").innerHTML = html;
@@ -963,56 +967,66 @@
   // address poisoning, offerta di lavoro su LinkedIn, paper wallet) più due situazioni legittime.
   var CASES = [
     { kind: "email", from: "Blockchain.com &lt;security@blockchain-alerts.info&gt;", head: "An application has been linked to your account",
-      body: "Se non sei stato tu, proteggi subito il tuo account: clicca qui e conferma l'accesso inserendo le 12 parole del tuo wallet.",
-      scam: true, why: ["Mittente: il dominio non è blockchain.com.", "Urgenza: «subito», altrimenti perdi tutto.", "Nessun servizio chiede mai le 12 parole del wallet."] },
-    { kind: "chat", from: "Uniswap · Discord", head: "Messaggio privato",
-      body: "🎉 Airdrop in corso! Hai diritto a 2,5 ETH. Collega MetaMask entro oggi su uniswap-claim.app per riceverli.",
-      scam: true, why: ["I progetti seri non scrivono in privato su Discord.", "Regalo enorme e scadenza: leva sull'avidità e sulla fretta.", "Il sito copia la grafica di Uniswap, ma l'indirizzo è un altro."] },
-    { kind: "chat", from: "crypto_mentor · Telegram", head: "Gruppo «Investiamo insieme»",
-      body: "Ops, ho incollato per sbaglio le mie 12 parole: dentro ci sono 3.000 $ in USDT. Prendeteli voi, a me non servono 😅",
-      scam: true, why: ["Il wallet ha i token ma non la moneta per pagare la commissione.", "Chi la invia per sbloccarli la perde subito: un programma la gira al truffatore.", "Nessuno regala 3.000 dollari a sconosciuti."] },
-    { kind: "url", from: "Barra degli indirizzi", head: "xn--paypl-7ve.com/login",
-      body: "Il browser mostra «paypal.com» con una lettera quasi identica. La pagina è uguale a quella vera e chiede email e password.",
-      scam: true, why: ["Il prefisso xn-- indica un dominio con caratteri «speciali» (punycode).", "Una sola lettera di un altro alfabeto basta a fare un dominio diverso.", "Meglio entrare sempre dai preferiti o digitando l'indirizzo."] },
-    { kind: "wallet", from: "Il tuo wallet · cronologia", head: "Devi mandare 500 USDT al tuo conto sull'exchange",
-      body: "Nella cronologia trovi «0x9Fa3…C7E1», da cui ieri ti è arrivato 0 USDT. Il tuo indirizzo dell'exchange è 0x9Fa3…C7E1. Copi quello dalla cronologia?",
-      scam: true, why: ["È l'«address poisoning»: un indirizzo creato apposta con inizio e fine uguali al tuo.", "La transazione da 0 serve solo a infilarlo nella tua cronologia.", "Copia l'indirizzo sempre dalla fonte (l'exchange), e controllalo tutto, non solo inizio e fine."] },
-    { kind: "chat", from: "Recruiter · LinkedIn", head: "Offerta: Blockchain Lead, 400.000 $ l'anno",
-      body: "Il tuo profilo è perfetto! Fai il colloquio video sul nostro sito. Se la webcam non va, incolla questo comando nel terminale per aggiornarla.",
-      scam: true, why: ["Stipendio fuori mercato, azienda vera usata come esca.", "Nessun colloquio vero chiede di incollare comandi nel terminale.", "Quel comando scarica ed esegue un programma malevolo in background."] },
-    { kind: "chat", from: "WhatsApp · numero sconosciuto", head: "Gruppo «Trading Elite Italia»",
-      body: "Il nostro esperto garantisce il 2% al giorno, senza rischi. Oggi ultimi 5 posti: investi da 250 € sulla nostra piattaforma.",
-      scam: true, why: ["Nessun investimento serio garantisce rendimenti, tanto meno il 2% al giorno.", "Posti limitati e fretta: pressione psicologica.", "Controlla se la piattaforma è autorizzata: la CONSOB pubblica avvisi e oscura i siti abusivi."] },
-    { kind: "wallet", from: "Il tuo wallet · conferma", head: "Firma la transazione",
-      body: "Invio di 10 EOS a lucia23.gm, memo «quota cena». Hai appena scritto tu nome, importo e memo, e Lucia te li ha confermati a voce.",
-      scam: false, why: ["Hai avviato tu l'operazione, con dati che conosci.", "Destinatario confermato da un altro canale (a voce).", "Controllare comunque nome e importo prima di firmare è sempre una buona abitudine."] },
-    { kind: "email", from: "Exchange &lt;noreply@exchange-che-usi.com&gt;", head: "Nuovo accesso al tuo account",
-      body: "Accesso da Chrome su Mac, Bari, alle 9:42. Se non sei stato tu, apri l'app e cambia la password. Non ti chiederemo mai password o parole segrete via email.",
-      scam: false, why: ["Nessun link da cliccare: ti dice di aprire l'app da solo.", "Non chiede né password né seed.", "Se eri tu (ora e città tornano), non devi fare niente."] },
-    { kind: "chat", from: "Stand alla fiera", head: "Regalo per i visitatori",
-      body: "Ecco un paper wallet già stampato, con il QR per ricevere e la chiave privata sotto il gratta-e-vinci: caricaci pure i tuoi risparmi.",
-      scam: true, why: ["Chi ha generato il paper wallet può conoscere la chiave privata.", "Appena ci carichi qualcosa, può svuotarlo.", "Un wallet si crea sempre da soli, su un dispositivo fidato."] }
+      body: L("Se non sei stato tu, proteggi subito il tuo account: clicca qui e conferma l'accesso inserendo le 12 parole del tuo wallet.", "If this wasn't you, protect your account now: click here and confirm access by entering your wallet's 12 words."),
+      scam: true, why: L(["Mittente: il dominio non è blockchain.com.", "Urgenza: «subito», altrimenti perdi tutto.", "Nessun servizio chiede mai le 12 parole del wallet."],
+        ["Sender: the domain isn't blockchain.com.", "Urgency: «now», or you lose everything.", "No service ever asks for your wallet's 12 words."]) },
+    { kind: "chat", from: "Uniswap · Discord", head: L("Messaggio privato", "Private message"),
+      body: L("🎉 Airdrop in corso! Hai diritto a 2,5 ETH. Collega MetaMask entro oggi su uniswap-claim.app per riceverli.", "🎉 Airdrop live! You're entitled to 2.5 ETH. Connect MetaMask today on uniswap-claim.app to receive them."),
+      scam: true, why: L(["I progetti seri non scrivono in privato su Discord.", "Regalo enorme e scadenza: leva sull'avidità e sulla fretta.", "Il sito copia la grafica di Uniswap, ma l'indirizzo è un altro."],
+        ["Serious projects don't send private messages on Discord.", "A huge gift and a deadline: it plays on greed and haste.", "The site copies Uniswap's look, but the address is different."]) },
+    { kind: "chat", from: "crypto_mentor · Telegram", head: L("Gruppo «Investiamo insieme»", "Group «Let's invest together»"),
+      body: L("Ops, ho incollato per sbaglio le mie 12 parole: dentro ci sono 3.000 $ in USDT. Prendeteli voi, a me non servono 😅", "Oops, I pasted my 12 words by mistake: there's $3,000 in USDT inside. Take it, I don't need it 😅"),
+      scam: true, why: L(["Il wallet ha i token ma non la moneta per pagare la commissione.", "Chi la invia per sbloccarli la perde subito: un programma la gira al truffatore.", "Nessuno regala 3.000 dollari a sconosciuti."],
+        ["The wallet has the tokens but not the coin to pay the fee.", "Whoever sends some to unlock them loses it at once: a program forwards it to the scammer.", "Nobody gives $3,000 away to strangers."]) },
+    { kind: "url", from: L("Barra degli indirizzi", "Address bar"), head: "xn--paypl-7ve.com/login",
+      body: L("Il browser mostra «paypal.com» con una lettera quasi identica. La pagina è uguale a quella vera e chiede email e password.", "The browser shows «paypal.com» with one almost identical letter. The page looks like the real one and asks for your email and password."),
+      scam: true, why: L(["Il prefisso xn-- indica un dominio con caratteri «speciali» (punycode).", "Una sola lettera di un altro alfabeto basta a fare un dominio diverso.", "Meglio entrare sempre dai preferiti o digitando l'indirizzo."],
+        ["The xn-- prefix means a domain with «special» characters (punycode).", "A single letter from another alphabet is enough to make a different domain.", "Always go in from your bookmarks or by typing the address."]) },
+    { kind: "wallet", from: L("Il tuo wallet · cronologia", "Your wallet · history"), head: L("Devi mandare 500 USDT al tuo conto sull'exchange", "You need to send 500 USDT to your exchange account"),
+      body: L("Nella cronologia trovi «0x9Fa3…C7E1», da cui ieri ti è arrivato 0 USDT. Il tuo indirizzo dell'exchange è 0x9Fa3…C7E1. Copi quello dalla cronologia?", "In your history you find «0x9Fa3…C7E1», which sent you 0 USDT yesterday. Your exchange address is 0x9Fa3…C7E1. Do you copy it from the history?"),
+      scam: true, why: L(["È l'«address poisoning»: un indirizzo creato apposta con inizio e fine uguali al tuo.", "La transazione da 0 serve solo a infilarlo nella tua cronologia.", "Copia l'indirizzo sempre dalla fonte (l'exchange), e controllalo tutto, non solo inizio e fine."],
+        ["It's «address poisoning»: an address made on purpose with the same start and end as yours.", "The 0 transaction is only there to slip it into your history.", "Always copy the address from the source (the exchange), and check all of it, not just the start and end."]) },
+    { kind: "chat", from: "Recruiter · LinkedIn", head: L("Offerta: Blockchain Lead, 400.000 $ l'anno", "Offer: Blockchain Lead, $400,000 a year"),
+      body: L("Il tuo profilo è perfetto! Fai il colloquio video sul nostro sito. Se la webcam non va, incolla questo comando nel terminale per aggiornarla.", "Your profile is perfect! Do the video interview on our site. If your webcam doesn't work, paste this command into the terminal to update it."),
+      scam: true, why: L(["Stipendio fuori mercato, azienda vera usata come esca.", "Nessun colloquio vero chiede di incollare comandi nel terminale.", "Quel comando scarica ed esegue un programma malevolo in background."],
+        ["An off-market salary, with a real company used as bait.", "No real interview asks you to paste commands into the terminal.", "That command downloads and runs malware in the background."]) },
+    { kind: "chat", from: L("WhatsApp · numero sconosciuto", "WhatsApp · unknown number"), head: L("Gruppo «Trading Elite Italia»", "Group «Trading Elite Italia»"),
+      body: L("Il nostro esperto garantisce il 2% al giorno, senza rischi. Oggi ultimi 5 posti: investi da 250 € sulla nostra piattaforma.", "Our expert guarantees 2% a day, risk-free. Last 5 places today: invest from €250 on our platform."),
+      scam: true, why: L(["Nessun investimento serio garantisce rendimenti, tanto meno il 2% al giorno.", "Posti limitati e fretta: pressione psicologica.", "Controlla se la piattaforma è autorizzata: la CONSOB pubblica avvisi e oscura i siti abusivi."],
+        ["No serious investment guarantees returns, let alone 2% a day.", "Limited places and haste: psychological pressure.", "Check whether the platform is authorized: regulators (CONSOB in Italy) publish warnings and block illegal sites."]) },
+    { kind: "wallet", from: L("Il tuo wallet · conferma", "Your wallet · confirmation"), head: L("Firma la transazione", "Sign the transaction"),
+      body: L("Invio di 10 EOS a lucia23.gm, memo «quota cena». Hai appena scritto tu nome, importo e memo, e Lucia te li ha confermati a voce.", "Sending 10 EOS to lucia23.gm, memo «dinner share». You've just typed the name, amount and memo yourself, and Lucia confirmed them to you in person."),
+      scam: false, why: L(["Hai avviato tu l'operazione, con dati che conosci.", "Destinatario confermato da un altro canale (a voce).", "Controllare comunque nome e importo prima di firmare è sempre una buona abitudine."],
+        ["You started the operation, with data you know.", "The recipient was confirmed through another channel (in person).", "Checking the name and amount before signing is always a good habit anyway."]) },
+    { kind: "email", from: "Exchange &lt;noreply@exchange-che-usi.com&gt;", head: L("Nuovo accesso al tuo account", "New sign-in to your account"),
+      body: L("Accesso da Chrome su Mac, Bari, alle 9:42. Se non sei stato tu, apri l'app e cambia la password. Non ti chiederemo mai password o parole segrete via email.", "Sign-in from Chrome on Mac, Bari, at 9:42. If this wasn't you, open the app and change your password. We will never ask for passwords or secret words by email."),
+      scam: false, why: L(["Nessun link da cliccare: ti dice di aprire l'app da solo.", "Non chiede né password né seed.", "Se eri tu (ora e città tornano), non devi fare niente."],
+        ["No link to click: it tells you to open the app yourself.", "It asks for neither a password nor a seed.", "If it was you (time and city match), you don't need to do anything."]) },
+    { kind: "chat", from: L("Stand alla fiera", "Stand at a trade fair"), head: L("Regalo per i visitatori", "A gift for visitors"),
+      body: L("Ecco un paper wallet già stampato, con il QR per ricevere e la chiave privata sotto il gratta-e-vinci: caricaci pure i tuoi risparmi.", "Here's a ready-printed paper wallet, with the QR code to receive and the private key under a scratch-off panel: go ahead and put your savings on it."),
+      scam: true, why: L(["Chi ha generato il paper wallet può conoscere la chiave privata.", "Appena ci carichi qualcosa, può svuotarlo.", "Un wallet si crea sempre da soli, su un dispositivo fidato."],
+        ["Whoever generated the paper wallet may know the private key.", "As soon as you put something on it, they can empty it.", "Always create a wallet yourself, on a trusted device."]) }
   ];
   var tIdx = 0, tScore = 0, tAnswered = false;
   function drawTruffa() {
     var box = $("truffa-box");
     if (tIdx >= CASES.length) {
-      box.innerHTML = '<div class="result"><p class="kicker">Risultato</p><h2>' + tScore + " su " + CASES.length + "</h2><p>" +
-        (tScore >= 9 ? "Ottimo: difficile fregarti." : tScore >= 6 ? "Bene, ma qualche trappola ti è sfuggita: rileggi i segnali." : "Attenzione: le truffe sono fatte per sembrare vere. Riprova con calma.") +
-        '</p><p class="warn">La regola d\'oro: nessuno, mai, ha bisogno delle tue 12 o 24 parole.</p><button type="button" class="btn ghost" data-tq="restart">Ricomincia</button></div>';
+      box.innerHTML = '<div class="result"><p class="kicker">' + L("Risultato", "Result") + "</p><h2>" + tScore + L(" su ", " out of ") + CASES.length + "</h2><p>" +
+        (tScore >= 9 ? L("Ottimo: difficile fregarti.", "Excellent: you're hard to fool.") : tScore >= 6 ? L("Bene, ma qualche trappola ti è sfuggita: rileggi i segnali.", "Good, but a few traps got past you: read the signs again.") : L("Attenzione: le truffe sono fatte per sembrare vere. Riprova con calma.", "Careful: scams are made to look real. Try again, calmly.")) +
+        '</p><p class="warn">' + L("La regola d'oro: nessuno, mai, ha bisogno delle tue 12 o 24 parole.", "The golden rule: nobody, ever, needs your 12 or 24 words.") + '</p><button type="button" class="btn ghost" data-tq="restart">' + L("Ricomincia", "Start again") + "</button></div>";
       return;
     }
     var c = CASES[tIdx];
     var icon = { email: "✉️", chat: "💬", url: "🌐", wallet: "👛" }[c.kind];
-    var html = '<p class="note">Caso ' + (tIdx + 1) + " di " + CASES.length + " · punti: " + tScore + "</p>" +
+    var html = '<p class="note">' + L("Caso ", "Case ") + (tIdx + 1) + L(" di ", " of ") + CASES.length + L(" · punti: ", " · points: ") + tScore + "</p>" +
       '<div class="mock ' + c.kind + '"><div class="mock-h"><span>' + icon + "</span><b>" + c.from + "</b></div>" +
       '<div class="mock-t">' + esc(c.head) + '</div><p>' + esc(c.body) + "</p></div>";
     if (!tAnswered) {
-      html += '<div class="row"><button type="button" class="btn bad" data-tq="scam">Truffa</button><button type="button" class="btn good" data-tq="ok">Tutto in regola</button></div>';
+      html += '<div class="row"><button type="button" class="btn bad" data-tq="scam">' + L("Truffa", "Scam") + '</button><button type="button" class="btn good" data-tq="ok">' + L("Tutto in regola", "All in order") + "</button></div>";
     } else {
-      html += '<div class="out ' + (tAnswered === "right" ? "ok" : "err") + '"><b>' + (tAnswered === "right" ? "Giusto." : "Sbagliato.") + "</b> " +
-        (c.scam ? "È una truffa." : "È legittimo.") + '<ul class="why">' + c.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul></div>" +
-        '<button type="button" class="btn" data-tq="next">' + (tIdx + 1 < CASES.length ? "Prossimo caso" : "Vedi il risultato") + "</button>";
+      html += '<div class="out ' + (tAnswered === "right" ? "ok" : "err") + '"><b>' + (tAnswered === "right" ? L("Giusto.", "Right.") : L("Sbagliato.", "Wrong.")) + "</b> " +
+        (c.scam ? L("È una truffa.", "It's a scam.") : L("È legittimo.", "It's legitimate.")) + '<ul class="why">' + c.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul></div>" +
+        '<button type="button" class="btn" data-tq="next">' + (tIdx + 1 < CASES.length ? L("Prossimo caso", "Next case") : L("Vedi il risultato", "See the result")) + "</button>";
     }
     box.innerHTML = html;
   }
@@ -1039,33 +1053,33 @@
   }
   function story(hist, id) {
     return hist.filter(function (h) { return h.nft_id === id; }).map(function (h) {
-      return "<li><b>" + esc(h.memo || "Passaggio") + "</b> · " + esc(h.from) + " → " + esc(h.to) + "<small>" + fmt(h.ts) + "</small></li>";
+      return "<li><b>" + esc(LT(h.memo) || L("Passaggio", "Transfer")) + "</b> · " + esc(h.from) + " → " + esc(h.to) + "<small>" + fmt(h.ts) + "</small></li>";
     }).join("");
   }
   $("nft-file").addEventListener("change", function (e) {
     var f = e.target.files[0], out = $("nft-out");
     if (!f) return;
     e.target.value = "";
-    if (!galleryCode()) { msg(out, "err", "La galleria non è configurata."); return; }
-    msg(out, "info", "Calcolo l'impronta e cerco nella galleria…");
+    if (!galleryCode()) { msg(out, "err", L("La galleria non è configurata.", "The gallery isn't configured.")); return; }
+    msg(out, "info", L("Calcolo l'impronta e cerco nella galleria…", "Calculating the fingerprint and searching the gallery…"));
     Promise.all([fileHash(f), galleryData()]).then(function (res) {
       var h = res[0], nfts = res[1][0], hist = res[1][1];
       var n = nfts.filter(function (x) { return x.hash === h; })[0];
       if (!n) {
-        msg(out, "err", "<b>Non è un'opera della galleria.</b> Forse è una copia, o è stata ritoccata anche di poco: l'impronta non corrisponde a nessun NFT.<br><code>" + h + "</code>");
+        msg(out, "err", L("<b>Non è un'opera della galleria.</b> Forse è una copia, o è stata ritoccata anche di poco: l'impronta non corrisponde a nessun NFT.", "<b>It isn't an artwork from the gallery.</b> Maybe it's a copy, or it's been retouched even slightly: the fingerprint doesn't match any NFT.") + "<br><code>" + h + "</code>");
         return;
       }
-      msg(out, "ok", "<b>Originale.</b> «" + esc(n.title) + "» di " + esc(n.artist) + ", NFT n. " + n.id + ".<br>Proprietario oggi: <b>" + esc(n.owner) + "</b>" +
+      msg(out, "ok", L("<b>Originale.</b> «", "<b>Original.</b> «") + esc(LT(n.title)) + L("» di ", "» by ") + esc(n.artist) + L(", NFT n. ", ", NFT no. ") + n.id + L(".<br>Proprietario oggi: <b>", ".<br>Owner today: <b>") + esc(n.owner) + "</b>" +
         '<ol class="list story">' + story(hist, n.id) + "</ol>");
     }).catch(fail(out));
   });
   loaders.galleria = function () {
-    if (!galleryCode()) { $("nft-list").innerHTML = "<p>La galleria non è configurata.</p>"; return; }
+    if (!galleryCode()) { $("nft-list").innerHTML = "<p>" + L("La galleria non è configurata.", "The gallery isn't configured.") + "</p>"; return; }
     galleryData().then(function (res) {
       $("nft-list").innerHTML = res[0].map(function (n) {
-        return '<div class="nft"><b>' + esc(n.title) + "</b><span>" + esc(n.artist) + "</span><small>NFT n. " + n.id + " · di " + esc(n.owner) + "</small></div>";
-      }).join("") || "<p>La galleria è ancora vuota.</p>";
-    }).catch(function () { $("nft-list").innerHTML = "<p>Galleria non raggiungibile.</p>"; });
+        return '<div class="nft"><b>' + esc(LT(n.title)) + "</b><span>" + esc(n.artist) + "</span><small>" + L("NFT n. ", "NFT no. ") + n.id + L(" · di ", " · owned by ") + esc(n.owner) + "</small></div>";
+      }).join("") || "<p>" + L("La galleria è ancora vuota.", "The gallery is still empty.") + "</p>";
+    }).catch(function () { $("nft-list").innerHTML = "<p>" + L("Galleria non raggiungibile.", "Gallery unreachable.") + "</p>"; });
   };
 
   // ---------- 10. Caccia al tesoro ----------
@@ -1082,7 +1096,7 @@
   }
   loaders.tesoro = function () {
     var code = treasureCode();
-    if (!code) { $("tesoro-rank").innerHTML = "<li>La caccia non è configurata.</li>"; return; }
+    if (!code) { $("tesoro-rank").innerHTML = "<li>" + L("La caccia non è configurata.", "The hunt isn't configured.") + "</li>"; return; }
     if (!$("team-name").value) $("team-name").value = store(TEAM_KEY) || nick();
     var pre = new URLSearchParams(location.search).get("codice");
     if (pre && !$("team-code").value) $("team-code").value = pre;
@@ -1090,21 +1104,21 @@
       var clues = res[0], finds = res[1];
       var foundIds = {};
       finds.forEach(function (f) { foundIds[f.clue_id] = true; });
-      $("tesoro-stato").textContent = "Codici nascosti: " + clues.length + " · già trovati da qualcuno: " + Object.keys(foundIds).length;
+      $("tesoro-stato").textContent = L("Codici nascosti: ", "Hidden codes: ") + clues.length + L(" · già trovati da qualcuno: ", " · already found by someone: ") + Object.keys(foundIds).length;
       $("tesoro-rank").innerHTML = rank(clues, finds).map(function (t) {
-        return "<li><b>" + esc(t.team) + "</b><span>" + t.points + " punti</span><small>" + t.found + (t.found === 1 ? " codice, " : " codici, ") + t.first + " per primi</small></li>";
+        return "<li><b>" + esc(t.team) + "</b><span>" + t.points + L(" punti", " points") + "</span><small>" + t.found + (t.found === 1 ? L(" codice, ", " code, ") : L(" codici, ", " codes, ")) + t.first + L(" per primi", " found first") + "</small></li>";
       }).join("");
-      if (!finds.length) $("tesoro-stato").textContent += " · nessun codice trovato, per ora";
-    }).catch(function () { $("tesoro-rank").innerHTML = "<li>Caccia non raggiungibile.</li>"; });
+      if (!finds.length) $("tesoro-stato").textContent += L(" · nessun codice trovato, per ora", " · no codes found yet");
+    }).catch(function () { $("tesoro-rank").innerHTML = "<li>" + L("Caccia non raggiungibile.", "Hunt unreachable.") + "</li>"; });
   };
   $("team-send").addEventListener("click", function () {
     var btn = this, out = $("team-out");
     var team = $("team-name").value.trim().slice(0, 24), codeTxt = $("team-code").value.trim();
-    if (!team) { msg(out, "err", "Scrivete il nome della squadra."); return; }
-    if (codeTxt.length < 4) { msg(out, "err", "Scrivete il codice trovato sul cartoncino."); return; }
+    if (!team) { msg(out, "err", L("Scrivete il nome della squadra.", "Write your team's name.")); return; }
+    if (codeTxt.length < 4) { msg(out, "err", L("Scrivete il codice trovato sul cartoncino.", "Write the code you found on the card.")); return; }
     store(TEAM_KEY, team);
     busy(btn, true);
-    msg(out, "info", "Il contratto controlla il codice…");
+    msg(out, "info", L("Il contratto controlla il codice…", "The contract is checking the code…"));
     var before;
     Chain.rows("finds", 0, treasureCode()).then(function (rs) {
       before = rs.length;
@@ -1113,7 +1127,7 @@
       return Chain.rows("finds", 0, treasureCode()).then(function (rs) {
         var mine = rs.filter(function (f) { return f.team === team; }).slice(-1)[0];
         var pts = mine ? +mine.points : 0;
-        msg(out, "ok", "<b>Codice giusto!</b> " + (mine && +mine.first ? "Siete i primi: <b>+" + pts + " punti</b>." : "Qualcuno l'aveva già trovato: <b>+1 punto</b>.") + " " + txLink(r));
+        msg(out, "ok", L("<b>Codice giusto!</b> ", "<b>Right code!</b> ") + (mine && +mine.first ? L("Siete i primi: <b>+", "You're first: <b>+") + pts + L(" punti</b>.", " points</b>.") : L("Qualcuno l'aveva già trovato: <b>+1 punto</b>.", "Someone found it before you: <b>+1 point</b>.")) + " " + txLink(r));
         $("team-code").value = "";
         loaders.tesoro();
       });
