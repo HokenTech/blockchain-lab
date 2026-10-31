@@ -3,7 +3,21 @@
 (function () {
   "use strict";
   var C = window.LAB_CONFIG;
-  var abiCache = null;
+  // ?contratto=nome.gm: il laboratorio legge il registro di un altro contratto con le stesse tabelle
+  // (per esempio quello pubblicato da un partecipante). In questa modalità non scrive: si usa cleos.
+  var own = new URLSearchParams(location.search).get("contratto");
+  if (own && /^[a-z1-5.]{1,12}$/.test(own)) {
+    C.contract = own;
+    C.own = true;
+    C.readOnly = true;
+  }
+  // ?demo=1: versione dimostrativa incorporata nelle pagine del sito. Legge tutto, non scrive niente,
+  // così i visitatori non sporcano il registro d'aula.
+  if (new URLSearchParams(location.search).get("demo")) {
+    C.demo = true;
+    C.readOnly = true;
+  }
+  var abiCache = {};
 
   function rpc(path, body) {
     var urls = C.rpc.slice();
@@ -37,13 +51,15 @@
     return e;
   }
 
-  function rows(table, limit) {
+  // code: un altro contratto da cui leggere (per esempio la galleria NFT); di solito il registro d'aula.
+  function rows(table, limit, code) {
     var out = [];
+    code = code || C.contract;
     function page(lower) {
       return rpc("/v1/chain/get_table_rows", {
         json: true,
-        code: C.contract,
-        scope: C.contract,
+        code: code,
+        scope: code,
         table: table,
         lower_bound: lower,
         limit: 200,
@@ -57,21 +73,34 @@
   }
 
   function ready() {
-    return !!(C.contract && C.aula && C.aulaKey && window.Antelope);
+    return !!(
+      C.contract &&
+      C.aula &&
+      C.aulaKey &&
+      window.Antelope &&
+      !C.readOnly
+    );
   }
 
-  function getAbi() {
-    if (abiCache) return Promise.resolve(abiCache);
-    return rpc("/v1/chain/get_abi", { account_name: C.contract }).then(
-      function (j) {
-        abiCache = j.abi;
-        return abiCache;
-      }
-    );
+  // L'ABI di ogni contratto si scarica una volta sola.
+  function getAbi(code) {
+    if (abiCache[code]) return Promise.resolve(abiCache[code]);
+    return rpc("/v1/chain/get_abi", { account_name: code }).then(function (j) {
+      abiCache[code] = j.abi;
+      return j.abi;
+    });
   }
 
   // Firma e invia un'azione del contratto con il permesso "lab" dell'account d'aula.
   function push(name, data, auth) {
+    if (C.readOnly)
+      return Promise.reject(
+        new Error(
+          C.demo
+            ? "Questa è la versione dimostrativa: qui si legge e si verifica, ma non si scrive. Al workshop si usa quella completa."
+            : "Qui stai guardando il contratto " + C.contract + ": per scriverci si usa cleos."
+        )
+      );
     if (!ready())
       return Promise.reject(
         new Error(
@@ -82,14 +111,16 @@
     var actor = (auth && auth.actor) || C.aula;
     var permission = (auth && auth.permission) || C.aulaPermission;
     var key = (auth && auth.key) || C.aulaKey;
-    return Promise.all([getAbi(), rpc("/v1/chain/get_info")]).then(function (
+    // auth.contract: un altro contratto su cui scrivere (per esempio la caccia al tesoro); di solito il registro d'aula.
+    var code = (auth && auth.contract) || C.contract;
+    return Promise.all([getAbi(code), rpc("/v1/chain/get_info")]).then(function (
       res
     ) {
       var abi = A.ABI.from(res[0]);
       var info = A.API.v1.GetInfoResponse.from(res[1]);
       var action = A.Action.from(
         {
-          account: C.contract,
+          account: code,
           name: name,
           authorization: [{ actor: actor, permission: permission }],
           data: data,

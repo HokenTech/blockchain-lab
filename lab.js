@@ -140,7 +140,17 @@
     });
   });
 
-  if (!Chain.ready()) {
+  if (C.demo) {
+    var demo = document.createElement("p");
+    demo.className = "banner own";
+    demo.textContent = "Versione dimostrativa: puoi leggere e verificare, ma non scrivere. Al workshop si usa quella completa.";
+    document.querySelector("main").insertBefore(demo, document.querySelector("main").firstChild);
+  } else if (C.own) {
+    var own = document.createElement("p");
+    own.className = "banner own";
+    own.innerHTML = "Stai guardando il registro del contratto <b>" + esc(C.contract) + "</b>: puoi verificare file e attestati. Per scrivere su questo contratto si usa cleos. <a href=\"" + location.pathname + "\">Torna al registro dell'aula</a>";
+    document.querySelector("main").insertBefore(own, document.querySelector("main").firstChild);
+  } else if (!Chain.ready()) {
     var warn = document.createElement("p");
     warn.className = "banner";
     warn.textContent =
@@ -438,6 +448,9 @@
         m[r.issuer] = r.org;
       });
       return m;
+    }).catch(function () {
+      // Un contratto senza tabella degli enti: si mostra il nome dell'account.
+      return {};
     });
   }
   $("cert-file").addEventListener("change", function (e) {
@@ -944,6 +957,168 @@
     drawServe();
   });
   drawServe();
+
+  // ---------- 8. Truffa o no? ----------
+  // I casi vengono dagli articoli del blog di Hoken Tech (phishing, Discord, seed regalata, punycode,
+  // address poisoning, offerta di lavoro su LinkedIn, paper wallet) più due situazioni legittime.
+  var CASES = [
+    { kind: "email", from: "Blockchain.com &lt;security@blockchain-alerts.info&gt;", head: "An application has been linked to your account",
+      body: "Se non sei stato tu, proteggi subito il tuo account: clicca qui e conferma l'accesso inserendo le 12 parole del tuo wallet.",
+      scam: true, why: ["Mittente: il dominio non è blockchain.com.", "Urgenza: «subito», altrimenti perdi tutto.", "Nessun servizio chiede mai le 12 parole del wallet."] },
+    { kind: "chat", from: "Uniswap · Discord", head: "Messaggio privato",
+      body: "🎉 Airdrop in corso! Hai diritto a 2,5 ETH. Collega MetaMask entro oggi su uniswap-claim.app per riceverli.",
+      scam: true, why: ["I progetti seri non scrivono in privato su Discord.", "Regalo enorme e scadenza: leva sull'avidità e sulla fretta.", "Il sito copia la grafica di Uniswap, ma l'indirizzo è un altro."] },
+    { kind: "chat", from: "crypto_mentor · Telegram", head: "Gruppo «Investiamo insieme»",
+      body: "Ops, ho incollato per sbaglio le mie 12 parole: dentro ci sono 3.000 $ in USDT. Prendeteli voi, a me non servono 😅",
+      scam: true, why: ["Il wallet ha i token ma non la moneta per pagare la commissione.", "Chi la invia per sbloccarli la perde subito: un programma la gira al truffatore.", "Nessuno regala 3.000 dollari a sconosciuti."] },
+    { kind: "url", from: "Barra degli indirizzi", head: "xn--paypl-7ve.com/login",
+      body: "Il browser mostra «paypal.com» con una lettera quasi identica. La pagina è uguale a quella vera e chiede email e password.",
+      scam: true, why: ["Il prefisso xn-- indica un dominio con caratteri «speciali» (punycode).", "Una sola lettera di un altro alfabeto basta a fare un dominio diverso.", "Meglio entrare sempre dai preferiti o digitando l'indirizzo."] },
+    { kind: "wallet", from: "Il tuo wallet · cronologia", head: "Devi mandare 500 USDT al tuo conto sull'exchange",
+      body: "Nella cronologia trovi «0x9Fa3…C7E1», da cui ieri ti è arrivato 0 USDT. Il tuo indirizzo dell'exchange è 0x9Fa3…C7E1. Copi quello dalla cronologia?",
+      scam: true, why: ["È l'«address poisoning»: un indirizzo creato apposta con inizio e fine uguali al tuo.", "La transazione da 0 serve solo a infilarlo nella tua cronologia.", "Copia l'indirizzo sempre dalla fonte (l'exchange), e controllalo tutto, non solo inizio e fine."] },
+    { kind: "chat", from: "Recruiter · LinkedIn", head: "Offerta: Blockchain Lead, 400.000 $ l'anno",
+      body: "Il tuo profilo è perfetto! Fai il colloquio video sul nostro sito. Se la webcam non va, incolla questo comando nel terminale per aggiornarla.",
+      scam: true, why: ["Stipendio fuori mercato, azienda vera usata come esca.", "Nessun colloquio vero chiede di incollare comandi nel terminale.", "Quel comando scarica ed esegue un programma malevolo in background."] },
+    { kind: "chat", from: "WhatsApp · numero sconosciuto", head: "Gruppo «Trading Elite Italia»",
+      body: "Il nostro esperto garantisce il 2% al giorno, senza rischi. Oggi ultimi 5 posti: investi da 250 € sulla nostra piattaforma.",
+      scam: true, why: ["Nessun investimento serio garantisce rendimenti, tanto meno il 2% al giorno.", "Posti limitati e fretta: pressione psicologica.", "Controlla se la piattaforma è autorizzata: la CONSOB pubblica avvisi e oscura i siti abusivi."] },
+    { kind: "wallet", from: "Il tuo wallet · conferma", head: "Firma la transazione",
+      body: "Invio di 10 EOS a lucia23.gm, memo «quota cena». Hai appena scritto tu nome, importo e memo, e Lucia te li ha confermati a voce.",
+      scam: false, why: ["Hai avviato tu l'operazione, con dati che conosci.", "Destinatario confermato da un altro canale (a voce).", "Controllare comunque nome e importo prima di firmare è sempre una buona abitudine."] },
+    { kind: "email", from: "Exchange &lt;noreply@exchange-che-usi.com&gt;", head: "Nuovo accesso al tuo account",
+      body: "Accesso da Chrome su Mac, Bari, alle 9:42. Se non sei stato tu, apri l'app e cambia la password. Non ti chiederemo mai password o parole segrete via email.",
+      scam: false, why: ["Nessun link da cliccare: ti dice di aprire l'app da solo.", "Non chiede né password né seed.", "Se eri tu (ora e città tornano), non devi fare niente."] },
+    { kind: "chat", from: "Stand alla fiera", head: "Regalo per i visitatori",
+      body: "Ecco un paper wallet già stampato, con il QR per ricevere e la chiave privata sotto il gratta-e-vinci: caricaci pure i tuoi risparmi.",
+      scam: true, why: ["Chi ha generato il paper wallet può conoscere la chiave privata.", "Appena ci carichi qualcosa, può svuotarlo.", "Un wallet si crea sempre da soli, su un dispositivo fidato."] }
+  ];
+  var tIdx = 0, tScore = 0, tAnswered = false;
+  function drawTruffa() {
+    var box = $("truffa-box");
+    if (tIdx >= CASES.length) {
+      box.innerHTML = '<div class="result"><p class="kicker">Risultato</p><h2>' + tScore + " su " + CASES.length + "</h2><p>" +
+        (tScore >= 9 ? "Ottimo: difficile fregarti." : tScore >= 6 ? "Bene, ma qualche trappola ti è sfuggita: rileggi i segnali." : "Attenzione: le truffe sono fatte per sembrare vere. Riprova con calma.") +
+        '</p><p class="warn">La regola d\'oro: nessuno, mai, ha bisogno delle tue 12 o 24 parole.</p><button type="button" class="btn ghost" data-tq="restart">Ricomincia</button></div>';
+      return;
+    }
+    var c = CASES[tIdx];
+    var icon = { email: "✉️", chat: "💬", url: "🌐", wallet: "👛" }[c.kind];
+    var html = '<p class="note">Caso ' + (tIdx + 1) + " di " + CASES.length + " · punti: " + tScore + "</p>" +
+      '<div class="mock ' + c.kind + '"><div class="mock-h"><span>' + icon + "</span><b>" + c.from + "</b></div>" +
+      '<div class="mock-t">' + esc(c.head) + '</div><p>' + esc(c.body) + "</p></div>";
+    if (!tAnswered) {
+      html += '<div class="row"><button type="button" class="btn bad" data-tq="scam">Truffa</button><button type="button" class="btn good" data-tq="ok">Tutto in regola</button></div>';
+    } else {
+      html += '<div class="out ' + (tAnswered === "right" ? "ok" : "err") + '"><b>' + (tAnswered === "right" ? "Giusto." : "Sbagliato.") + "</b> " +
+        (c.scam ? "È una truffa." : "È legittimo.") + '<ul class="why">' + c.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul></div>" +
+        '<button type="button" class="btn" data-tq="next">' + (tIdx + 1 < CASES.length ? "Prossimo caso" : "Vedi il risultato") + "</button>";
+    }
+    box.innerHTML = html;
+  }
+  $("truffa-box").addEventListener("click", function (e) {
+    var a = e.target.dataset.tq;
+    if (!a) return;
+    if (a === "restart") { tIdx = 0; tScore = 0; tAnswered = false; }
+    else if (a === "next") { tIdx++; tAnswered = false; }
+    else if (!tAnswered) {
+      var right = (a === "scam") === CASES[tIdx].scam;
+      if (right) tScore++;
+      tAnswered = right ? "right" : "wrong";
+    }
+    drawTruffa();
+  });
+  drawTruffa();
+
+  // ---------- 9. Galleria NFT ----------
+  // Legge il contratto galleria (in modalità ?contratto= quello del partecipante) e confronta l'impronta
+  // dell'immagine scelta con quelle registrate negli NFT.
+  function galleryCode() { return C.own ? C.contract : C.galleria; }
+  function galleryData() {
+    return Promise.all([Chain.rows("nfts", 0, galleryCode()), Chain.rows("history", 0, galleryCode())]);
+  }
+  function story(hist, id) {
+    return hist.filter(function (h) { return h.nft_id === id; }).map(function (h) {
+      return "<li><b>" + esc(h.memo || "Passaggio") + "</b> · " + esc(h.from) + " → " + esc(h.to) + "<small>" + fmt(h.ts) + "</small></li>";
+    }).join("");
+  }
+  $("nft-file").addEventListener("change", function (e) {
+    var f = e.target.files[0], out = $("nft-out");
+    if (!f) return;
+    e.target.value = "";
+    if (!galleryCode()) { msg(out, "err", "La galleria non è configurata."); return; }
+    msg(out, "info", "Calcolo l'impronta e cerco nella galleria…");
+    Promise.all([fileHash(f), galleryData()]).then(function (res) {
+      var h = res[0], nfts = res[1][0], hist = res[1][1];
+      var n = nfts.filter(function (x) { return x.hash === h; })[0];
+      if (!n) {
+        msg(out, "err", "<b>Non è un'opera della galleria.</b> Forse è una copia, o è stata ritoccata anche di poco: l'impronta non corrisponde a nessun NFT.<br><code>" + h + "</code>");
+        return;
+      }
+      msg(out, "ok", "<b>Originale.</b> «" + esc(n.title) + "» di " + esc(n.artist) + ", NFT n. " + n.id + ".<br>Proprietario oggi: <b>" + esc(n.owner) + "</b>" +
+        '<ol class="list story">' + story(hist, n.id) + "</ol>");
+    }).catch(fail(out));
+  });
+  loaders.galleria = function () {
+    if (!galleryCode()) { $("nft-list").innerHTML = "<p>La galleria non è configurata.</p>"; return; }
+    galleryData().then(function (res) {
+      $("nft-list").innerHTML = res[0].map(function (n) {
+        return '<div class="nft"><b>' + esc(n.title) + "</b><span>" + esc(n.artist) + "</span><small>NFT n. " + n.id + " · di " + esc(n.owner) + "</small></div>";
+      }).join("") || "<p>La galleria è ancora vuota.</p>";
+    }).catch(function () { $("nft-list").innerHTML = "<p>Galleria non raggiungibile.</p>"; });
+  };
+
+  // ---------- 10. Caccia al tesoro ----------
+  // Scrive sul contratto della caccia (in modalità ?contratto= legge quello del partecipante).
+  var TEAM_KEY = "hk-lab-team";
+  function treasureCode() { return C.own ? C.contract : C.tesoro; }
+  function rank(clues, finds) {
+    var teams = {};
+    finds.forEach(function (f) {
+      var t = teams[f.team] || (teams[f.team] = { team: f.team, points: 0, found: 0, first: 0 });
+      t.points += +f.points; t.found++; if (+f.first) t.first++;
+    });
+    return Object.keys(teams).map(function (k) { return teams[k]; }).sort(function (a, b) { return b.points - a.points || b.first - a.first; });
+  }
+  loaders.tesoro = function () {
+    var code = treasureCode();
+    if (!code) { $("tesoro-rank").innerHTML = "<li>La caccia non è configurata.</li>"; return; }
+    if (!$("team-name").value) $("team-name").value = store(TEAM_KEY) || nick();
+    var pre = new URLSearchParams(location.search).get("codice");
+    if (pre && !$("team-code").value) $("team-code").value = pre;
+    Promise.all([Chain.rows("clues", 0, code), Chain.rows("finds", 0, code)]).then(function (res) {
+      var clues = res[0], finds = res[1];
+      var foundIds = {};
+      finds.forEach(function (f) { foundIds[f.clue_id] = true; });
+      $("tesoro-stato").textContent = "Codici nascosti: " + clues.length + " · già trovati da qualcuno: " + Object.keys(foundIds).length;
+      $("tesoro-rank").innerHTML = rank(clues, finds).map(function (t) {
+        return "<li><b>" + esc(t.team) + "</b><span>" + t.points + " punti</span><small>" + t.found + (t.found === 1 ? " codice, " : " codici, ") + t.first + " per primi</small></li>";
+      }).join("");
+      if (!finds.length) $("tesoro-stato").textContent += " · nessun codice trovato, per ora";
+    }).catch(function () { $("tesoro-rank").innerHTML = "<li>Caccia non raggiungibile.</li>"; });
+  };
+  $("team-send").addEventListener("click", function () {
+    var btn = this, out = $("team-out");
+    var team = $("team-name").value.trim().slice(0, 24), codeTxt = $("team-code").value.trim();
+    if (!team) { msg(out, "err", "Scrivete il nome della squadra."); return; }
+    if (codeTxt.length < 4) { msg(out, "err", "Scrivete il codice trovato sul cartoncino."); return; }
+    store(TEAM_KEY, team);
+    busy(btn, true);
+    msg(out, "info", "Il contratto controlla il codice…");
+    var before;
+    Chain.rows("finds", 0, treasureCode()).then(function (rs) {
+      before = rs.length;
+      return Chain.push("claim", { by: C.aula, team: team, code: codeTxt }, { contract: treasureCode() });
+    }).then(function (r) {
+      return Chain.rows("finds", 0, treasureCode()).then(function (rs) {
+        var mine = rs.filter(function (f) { return f.team === team; }).slice(-1)[0];
+        var pts = mine ? +mine.points : 0;
+        msg(out, "ok", "<b>Codice giusto!</b> " + (mine && +mine.first ? "Siete i primi: <b>+" + pts + " punti</b>." : "Qualcuno l'aveva già trovato: <b>+1 punto</b>.") + " " + txLink(r));
+        $("team-code").value = "";
+        loaders.tesoro();
+      });
+    }).catch(fail(out)).then(function () { busy(btn, false); });
+  });
 
   route();
 })();

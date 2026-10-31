@@ -61,6 +61,18 @@
             ><b>7</b><span>Serve?</span
             ><small>Ci serve davvero una blockchain?</small></a
           >
+          <a href="#truffa"
+            ><b>8</b><span>Truffa?</span
+            ><small>Riconosci le truffe crypto</small></a
+          >
+          <a href="#galleria"
+            ><b>9</b><span>Galleria</span
+            ><small>NFT: è l'opera originale?</small></a
+          >
+          <a href="#tesoro"
+            ><b>10</b><span>Tesoro</span
+            ><small>Caccia al tesoro su blockchain</small></a
+          >
         </nav>
       </section>
 
@@ -256,6 +268,64 @@ Il workshop si tiene a Bari l'11 novembre 2026.</textarea
         <div id="gara-box"></div>
         <h2>Buste in gara</h2>
         <ol id="bid-list" class="list"></ol>
+      </section>
+
+      <!-- 8. TRUFFA? -->
+      <section data-view="truffa">
+        <p class="kicker">Esercizio 8</p>
+        <h1>Truffa o no?</h1>
+        <p class="lead">
+          Dieci situazioni prese da casi veri. Per ognuna decidi: è una truffa,
+          o è tutto in regola? Poi leggi i segnali da riconoscere.
+        </p>
+        <div id="truffa-box"></div>
+      </section>
+
+      <!-- 9. GALLERIA -->
+      <section data-view="galleria">
+        <p class="kicker">Esercizio 9</p>
+        <h1>È l'opera originale?</h1>
+        <p class="lead">
+          Ogni opera della galleria ha un NFT con l'impronta del suo file. Carica
+          un'immagine: scopri se è l'originale, chi la possiede e da chi è passata.
+        </p>
+        <div class="samples">
+          <p>Scarica un'opera, poi caricala qui sotto:</p>
+          <a href="demo/opere/raccolta-all-alba.jpg" download>Raccolta all'alba</a>
+          <a href="demo/opere/olio-appena-estratto.jpg" download>Olio appena estratto</a>
+          <a href="demo/opere/quattordici-lattine.jpg" download>Quattordici lattine</a>
+          <a href="demo/opere/olio-copia-ritoccata.jpg" download>Una copia «uguale»</a>
+        </div>
+        <label class="drop"
+          ><input type="file" id="nft-file" accept="image/*" /><span
+            >Tocca per scegliere un'immagine</span
+          ></label
+        >
+        <div id="nft-out" class="out"></div>
+        <h2>Le opere della galleria</h2>
+        <div id="nft-list" class="nfts"></div>
+      </section>
+
+      <!-- 10. TESORO -->
+      <section data-view="tesoro">
+        <p class="kicker">Esercizio 10</p>
+        <h1>Caccia al tesoro</h1>
+        <p class="lead">
+          Trovate i cartoncini nascosti e scrivete qui il codice segreto. Il
+          contratto conosce solo la sua impronta: se corrisponde, i punti sono
+          vostri. Chi arriva primo prende tutti i punti, gli altri uno.
+        </p>
+        <label class="field">La vostra squadra
+          <input id="team-name" maxlength="24" placeholder="es. I Pirati del Levante" />
+        </label>
+        <label class="field">Il codice trovato
+          <input id="team-code" maxlength="40" autocomplete="off" autocapitalize="off" placeholder="es. olivo-faro-382" />
+        </label>
+        <button type="button" class="btn" id="team-send">Invia il codice</button>
+        <div id="team-out" class="out"></div>
+        <h2>Classifica</h2>
+        <p class="note" id="tesoro-stato"></p>
+        <ol id="tesoro-rank" class="rank"></ol>
       </section>
 
       <!-- 7. SERVE? -->

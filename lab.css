@@ -595,3 +595,36 @@ select:focus {
 .samples { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0 14px; }
 .samples p { width: 100%; margin: 0; color: var(--muted); font-size: 15px; }
 .samples a { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); text-decoration: none; font-weight: 600; font-size: 15px; }
+
+.banner.own { margin: 0 0 18px; background: rgba(255, 198, 26, 0.16); color: var(--ink); }
+.banner.own a { font-weight: 600; }
+
+/* Esercizio 8: situazioni simulate */
+.mock { border-radius: 16px; border: 1px solid var(--line); background: var(--card); padding: 14px 16px; margin: 10px 0 14px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06); }
+.mock-h { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+.mock-h b { font-weight: 600; color: var(--ink); }
+.mock-t { font-weight: 700; margin: 8px 0 4px; }
+.mock p { margin: 0; }
+.mock.url .mock-t { font-family: "JetBrains Mono", monospace; font-size: 15px; background: var(--bg); padding: 8px 10px; border-radius: 8px; word-break: break-all; }
+.mock.chat { border-left: 5px solid #25a35a; }
+.mock.email { border-left: 5px solid #4b7bec; }
+.mock.wallet { border-left: 5px solid var(--gold); }
+.btn.bad { background: var(--bad); color: #fff; }
+.btn.good { background: var(--ok); color: #fff; }
+.why { margin: 8px 0 0; padding-left: 20px; }
+.why li { margin: 4px 0; }
+
+/* Esercizio 9: galleria NFT */
+.nfts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.nft { padding: 12px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); display: grid; gap: 2px; }
+.nft span { color: var(--muted); font-size: 14px; }
+.nft small { color: var(--muted); font-size: 12px; }
+.story { font-size: 14px; margin-top: 8px; }
+.story small { display: block; opacity: 0.8; }
+
+/* Esercizio 10: classifica della caccia al tesoro */
+.rank { list-style: none; padding: 0; margin: 0; counter-reset: pos; }
+.rank li { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 4px 10px; padding: 10px 0; border-bottom: 1px solid var(--line); counter-increment: pos; }
+.rank li::before { content: counter(pos); grid-row: span 2; width: 30px; height: 30px; border-radius: 50%; background: var(--gold); color: var(--navy); display: grid; place-items: center; font-weight: 700; }
+.rank li span { font-weight: 700; }
+.rank li small { grid-column: 2 / 4; color: var(--muted); font-size: 13px; }

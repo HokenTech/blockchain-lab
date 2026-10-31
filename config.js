@@ -11,5 +11,7 @@ window.LAB_CONFIG = {
   "contract": "bitlabreg.gm",
   "aula": "aulabari.gm",
   "aulaPermission": "lab",
-  "aulaKey": "PVT_K1_2FEw2vLyXXKxELN676g5SFKuzqAAS6yLH8diB4nE8vDuBVKty"
+  "aulaKey": "PVT_K1_2FEw2vLyXXKxELN676g5SFKuzqAAS6yLH8diB4nE8vDuBVKty",
+  "galleria": "galleria1.gm",
+  "tesoro": "tesoro1.gm"
 };
